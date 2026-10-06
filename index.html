@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Video KYC POC – Proactive Medicare</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Lora:ital,wght@0,500;0,600;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --brand:#1C4E80; --brand-ink:#12355A; --brand-soft:#E8EFF6; --mist:#D5E0EB;
+  --accent:#2F9C78; --accent-ink:#1F7558; --warn:#C27C0E; --danger:#B53B3B;
+  --bg:#F6F9FC; --surface:#FFFFFF; --text:#1E2B3A; --muted:#5B6B7C; --line:#D9E2EC;
+  --shadow:0 10px 30px rgba(18,53,90,.12);
+  --sans:'Poppins',system-ui,-apple-system,'Segoe UI',Roboto,Arial,sans-serif;
+  --serif:'Lora',Georgia,'Times New Roman',serif;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --brand:#6FA3D8; --brand-ink:#A9CBEE; --brand-soft:#1B2B3D; --mist:#22344A;
+    --accent:#4CC197; --accent-ink:#7DD9B6; --warn:#E3A43A; --danger:#E07070;
+    --bg:#0F1822; --surface:#172331; --text:#E4ECF4; --muted:#9AAABB; --line:#2A3B4F;
+    --shadow:0 10px 30px rgba(0,0,0,.4);
+  }
+}
+:root[data-theme="dark"]{
+  --brand:#6FA3D8; --brand-ink:#A9CBEE; --brand-soft:#1B2B3D; --mist:#22344A;
+  --accent:#4CC197; --accent-ink:#7DD9B6; --warn:#E3A43A; --danger:#E07070;
+  --bg:#0F1822; --surface:#172331; --text:#E4ECF4; --muted:#9AAABB; --line:#2A3B4F;
+  --shadow:0 10px 30px rgba(0,0,0,.4);
+}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:var(--bg);color:var(--text);font-family:var(--sans);font-size:15px;line-height:1.6}
+img{max-width:100%}
+a{color:var(--brand)}
+button,input,select,textarea{font:inherit;color:inherit}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:1140px;margin:0 auto;padding:0 20px}
+
+/* POC switcher */
+.poc{background:#0E2740;color:#DCE8F4;font-size:13px;position:sticky;top:env(safe-area-inset-top,0px);z-index:40}
+.poc .wrap{display:flex;align-items:center;gap:14px;flex-wrap:wrap;padding-top:8px;padding-bottom:8px}
+.poc b{color:#fff;font-weight:600}
+.poc nav{display:flex;gap:4px;flex-wrap:wrap;margin-left:auto}
+.poc nav a{color:#DCE8F4;text-decoration:none;padding:6px 12px;border-radius:999px;border:1px solid transparent}
+.poc nav a:hover{border-color:#3C5875}
+.poc nav a[aria-current="page"]{background:#fff;color:#0E2740;font-weight:600}
+.poc .count{display:inline-block;min-width:18px;padding:0 5px;margin-left:4px;border-radius:9px;background:var(--accent);color:#fff;font-size:11px;text-align:center;line-height:18px}
+
+/* Site chrome */
+.topbar{background:var(--mist);font-size:13px}
+.topbar .wrap{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;padding-top:6px;padding-bottom:6px}
+.topbar a{text-decoration:none;font-weight:600;color:var(--brand-ink)}
+.header{background:var(--surface);border-bottom:1px solid var(--line)}
+.header .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;padding-top:14px;padding-bottom:14px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:10px;text-decoration:none;color:var(--brand-ink)}
+.logo .wm{line-height:1.05}
+.logo .wm strong{display:block;font-size:20px;font-weight:700;letter-spacing:.2px}
+.logo .wm span{font-size:12.5px;color:var(--muted)}
+.mainnav{display:flex;gap:22px;flex-wrap:wrap;font-weight:500;font-size:14px}
+.mainnav a{text-decoration:none;color:var(--text)}
+.mainnav a.on{color:var(--brand);box-shadow:inset 0 -2px 0 var(--accent)}
+.pagehero{background:linear-gradient(0deg,var(--brand-ink),var(--brand-ink));color:#fff}
+:root[data-theme="dark"] .pagehero{background:#13253A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .pagehero{background:#13253A}}
+.pagehero .wrap{padding-top:36px;padding-bottom:36px}
+.crumb{font-size:13px;opacity:.8}
+.pagehero h1{font-family:var(--serif);font-weight:600;font-size:clamp(28px,4vw,40px);margin:4px 0 2px}
+.pagehero p{margin:0;opacity:.9}
+
+/* Layout */
+main{padding:36px 0 60px}
+.grid2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:32px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.panel{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:26px}
+.panel h2{font-family:var(--serif);font-weight:600;font-size:24px;margin:0 0 6px;color:var(--brand-ink)}
+.lead{color:var(--muted);margin:0 0 20px}
+.side h3{font-size:16px;margin:0 0 10px;color:var(--brand-ink)}
+.side ul{list-style:none;margin:0;padding:0}
+.side li{padding:9px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.cqc{margin-top:18px;background:var(--brand-soft);border-radius:12px;padding:16px}
+.cqc .row{display:flex;justify-content:space-between;font-size:13.5px;padding:3px 0}
+.cqc .good{color:var(--accent-ink);font-weight:600}
+
+/* Forms */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media (max-width:560px){.fgrid{grid-template-columns:1fr}}
+.full{grid-column:1/-1}
+label.f{display:block;font-size:13.5px;font-weight:500;margin-bottom:6px}
+label.f em{color:var(--danger);font-style:normal}
+input[type=text],input[type=email],input[type=tel],input[type=date],select,textarea{
+  width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text)}
+textarea{min-height:110px;resize:vertical}
+input:focus,select:focus,textarea:focus{border-color:var(--brand);outline:none;box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 22%,transparent)}
+.radios{display:flex;gap:10px;flex-wrap:wrap}
+.radios label{display:flex;gap:7px;align-items:center;padding:8px 13px;border:1px solid var(--line);border-radius:999px;cursor:pointer;font-size:14px}
+.radios input{accent-color:var(--brand)}
+.err{color:var(--danger);font-size:12.5px;margin-top:4px;display:none}
+.invalid+.err,.invalid~.err{display:block}
+.invalid{border-color:var(--danger)!important}
+
+/* The new KYC opt-in block */
+.kyc-opt{margin-top:4px;border:1.5px dashed var(--accent);background:color-mix(in srgb,var(--accent) 7%,var(--surface));border-radius:12px;padding:14px 16px}
+.kyc-opt label.chk{display:flex;gap:11px;align-items:flex-start;cursor:pointer;font-weight:600}
+.kyc-opt input[type=checkbox]{width:20px;height:20px;accent-color:var(--accent);margin-top:2px;flex:none}
+.kyc-opt small{display:block;font-weight:400;color:var(--muted);font-size:13px}
+.newtag{display:inline-block;font-size:11px;font-weight:600;background:var(--accent);color:#fff;border-radius:6px;padding:1px 7px;margin-left:6px;vertical-align:2px}
+.kyc-sum{margin-top:12px;display:none;gap:10px;align-items:center;flex-wrap:wrap;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:14px}
+.kyc-sum.on{display:flex}
+.kyc-sum .lnk{background:none;border:0;color:var(--brand);text-decoration:underline;cursor:pointer;padding:0;font-size:13.5px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:999px;padding:12px 24px;font-weight:600;cursor:pointer;text-decoration:none;font-size:14.5px;transition:background .15s,transform .05s}
+.btn:active{transform:translateY(1px)}
+.btn-primary{background:var(--brand);color:#fff}
+:root[data-theme="dark"] .btn-primary{color:#0F1822}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .btn-primary{color:#0F1822}}
+.btn-primary:hover{background:var(--brand-ink)}
+.btn-accent{background:var(--accent);color:#fff}
+.btn-accent:hover{background:var(--accent-ink)}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--text)}
+.btn-ghost:hover{border-color:var(--brand)}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-sm{padding:7px 14px;font-size:13px}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:22px}
+
+.thanks{text-align:center;padding:30px 10px}
+.thanks .tick{width:60px;height:60px;border-radius:50%;background:var(--accent);color:#fff;display:grid;place-items:center;margin:0 auto 14px;font-size:30px}
+.thanks h2{margin-bottom:6px}
+
+/* Modal */
+.backdrop{position:fixed;inset:0;background:rgba(10,25,41,.55);display:none;align-items:flex-start;justify-content:center;z-index:100;overflow:auto;padding:max(24px,env(safe-area-inset-top,0px)) 14px max(24px,env(safe-area-inset-bottom,0px))}
+.backdrop.on{display:flex}
+.modal{background:var(--surface);border-radius:16px;box-shadow:var(--shadow);width:100%;max-width:720px;animation:pop .2s ease-out}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.98)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.modal{animation:none}}
+.mhead{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:20px 24px 14px;border-bottom:1px solid var(--line)}
+.mhead h3{margin:0;font-family:var(--serif);font-size:22px;font-weight:600;color:var(--brand-ink)}
+.mhead p{margin:2px 0 0;color:var(--muted);font-size:13.5px}
+.x{background:none;border:0;font-size:26px;line-height:1;cursor:pointer;color:var(--muted);padding:2px 6px}
+.mbody{padding:20px 24px}
+.mfoot{padding:14px 24px 20px;display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap;border-top:1px solid var(--line)}
+.steps{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:22px}
+@media (max-width:640px){.steps{grid-template-columns:1fr}}
+.sh{font-size:13.5px;font-weight:600;margin:0 0 8px;color:var(--brand-ink)}
+.sh span{display:inline-grid;place-items:center;width:22px;height:22px;border-radius:50%;background:var(--brand);color:#fff;font-size:12px;margin-right:6px}
+:root[data-theme="dark"] .sh span{color:#0F1822}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .sh span{color:#0F1822}}
+
+.cal{border:1px solid var(--line);border-radius:12px;padding:10px}
+.calh{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;font-weight:600;font-size:14px}
+.calh button{background:none;border:1px solid var(--line);border-radius:8px;width:30px;height:30px;cursor:pointer}
+.calg{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;text-align:center}
+.calg .dow{font-size:11.5px;color:var(--muted);padding:4px 0}
+.calg button{border:0;background:transparent;border-radius:8px;padding:7px 0;cursor:pointer;font-size:13.5px}
+.calg button.avail{background:var(--brand-soft);color:var(--brand-ink);font-weight:600}
+.calg button.avail:hover{outline:1px solid var(--brand)}
+.calg button.sel{background:var(--brand);color:#fff}
+:root[data-theme="dark"] .calg button.sel{color:#0F1822}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .calg button.sel{color:#0F1822}}
+.calg button:disabled{color:var(--muted);opacity:.45;cursor:default}
+.legend{display:flex;gap:14px;font-size:12px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;background:var(--brand-soft);margin-right:5px;vertical-align:-1px}
+.slots{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.slot{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:9px 4px;cursor:pointer;font-size:13.5px;font-weight:500}
+.slot:hover:not(:disabled){border-color:var(--brand)}
+.slot.sel{background:var(--accent);border-color:var(--accent);color:#fff}
+.slot:disabled{text-decoration:line-through;opacity:.45;cursor:not-allowed}
+.hint{font-size:12.5px;color:var(--muted)}
+.drop{border:1.5px dashed var(--line);border-radius:12px;padding:16px;text-align:center;cursor:pointer;background:var(--bg)}
+.drop:hover,.drop.over{border-color:var(--brand)}
+.files{list-style:none;margin:10px 0 0;padding:0;font-size:13px}
+.files li{display:flex;justify-content:space-between;gap:8px;padding:6px 10px;background:var(--brand-soft);border-radius:8px;margin-top:6px}
+.files button{background:none;border:0;color:var(--danger);cursor:pointer}
+.summary{background:var(--brand-soft);border-radius:12px;padding:12px 14px;font-size:14px;margin-top:16px}
+.linkbox{display:flex;gap:8px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:13px;word-break:break-all;margin:10px 0}
+
+/* Admin */
+.admin-wrap{display:grid;grid-template-columns:220px minmax(0,1fr);gap:24px}
+@media (max-width:860px){.admin-wrap{grid-template-columns:1fr}}
+.aside{background:var(--brand-ink);color:#E1ECF7;border-radius:14px;padding:18px;align-self:start}
+:root[data-theme="dark"] .aside{background:#13253A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .aside{background:#13253A}}
+.aside h4{margin:0 0 12px;font-size:14px;color:#fff}
+.aside a{display:block;color:#E1ECF7;text-decoration:none;padding:8px 10px;border-radius:8px;font-size:14px}
+.aside a.on,.aside a:hover{background:rgba(255,255,255,.12)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin-bottom:18px}
+@media (max-width:640px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:14px}
+.stat b{display:block;font-size:26px;line-height:1.1;color:var(--brand-ink)}
+.stat span{font-size:12.5px;color:var(--muted)}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.tabs button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;cursor:pointer;font-size:13px}
+.tabs button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+:root[data-theme="dark"] .tabs button.on{color:#0F1822}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .tabs button.on{color:#0F1822}}
+.tablewrap{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--surface)}
+table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:760px}
+th,td{text-align:left;padding:11px 12px;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-weight:600;font-size:12.5px;color:var(--muted);background:var(--bg)}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;padding:2px 10px;border-radius:999px;font-size:12px;font-weight:600;white-space:nowrap}
+.p-scheduled{background:var(--brand-soft);color:var(--brand-ink)}
+.p-live{background:color-mix(in srgb,var(--danger) 15%,transparent);color:var(--danger)}
+.p-completed{background:color-mix(in srgb,var(--warn) 18%,transparent);color:var(--warn)}
+.p-mom_shared{background:color-mix(in srgb,var(--accent) 16%,transparent);color:var(--accent-ink)}
+.p-cancelled{background:var(--bg);color:var(--muted)}
+.t-service{color:var(--brand)}
+.t-job{color:var(--accent-ink)}
+.rowact{display:flex;gap:6px;flex-wrap:wrap}
+.empty{padding:30px;text-align:center;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chip{border:1px solid var(--line);border-radius:999px;padding:6px 13px;cursor:pointer;background:var(--surface);font-size:13.5px}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.addslot{display:flex;gap:8px;margin-top:10px;max-width:280px}
+.addslot input{padding:7px 10px}
+.kv{display:grid;grid-template-columns:140px 1fr;gap:6px 12px;font-size:14px}
+.kv dt{color:var(--muted)}
+.kv dd{margin:0}
+
+/* Outbox */
+.outbox{display:grid;grid-template-columns:330px minmax(0,1fr);gap:20px}
+@media (max-width:860px){.outbox{grid-template-columns:1fr}}
+.mlist{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden;align-self:start}
+.mitem{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);background:transparent;padding:12px 14px;cursor:pointer}
+.mitem:last-child{border-bottom:0}
+.mitem.on{background:var(--brand-soft)}
+.mitem .to{font-size:12px;color:var(--muted)}
+.mitem .sub{font-weight:600;font-size:13.5px;margin:2px 0}
+.mitem .tag{font-size:11px;font-weight:600;padding:1px 7px;border-radius:5px;background:var(--mist);color:var(--brand-ink)}
+.email{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.email .meta{padding:16px 20px;border-bottom:1px solid var(--line);font-size:13.5px}
+.email .meta h3{margin:0 0 6px;font-size:18px}
+.email .meta div{color:var(--muted)}
+.ebody{padding:24px;background:var(--bg)}
+.ecard{max-width:560px;margin:0 auto;background:var(--surface);border-radius:12px;overflow:hidden;border:1px solid var(--line)}
+.ecard .eh{background:var(--brand-ink);padding:16px 22px;color:#fff;display:flex;align-items:center;gap:10px}
+:root[data-theme="dark"] .ecard .eh{background:#13253A}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .ecard .eh{background:#13253A}}
+.ecard .ec{padding:22px;font-size:14.5px}
+.ecard .ec h4{font-family:var(--serif);font-size:20px;margin:0 0 10px;color:var(--brand-ink)}
+.ecard table.et{min-width:0;font-size:14px;margin:12px 0;background:var(--brand-soft);border-radius:10px}
+.ecard table.et td{border:0;padding:6px 12px}
+.ecard .ef{padding:14px 22px;font-size:12px;color:var(--muted);border-top:1px solid var(--line)}
+.momblock{background:var(--bg);border-left:3px solid var(--accent);padding:12px 14px;border-radius:6px;margin:10px 0;white-space:pre-wrap}
+
+/* Meeting room */
+.room{background:#0B1724;color:#E6EEF6;min-height:calc(100vh - 40px);padding:20px 0 40px}
+.room .wrap{max-width:1180px}
+.rhead{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap;margin-bottom:16px}
+.rhead h2{margin:0;font-size:20px;font-weight:600}
+.rhead .sub{font-size:13px;color:#9FB3C8}
+.live{display:inline-flex;align-items:center;gap:7px;background:#B53B3B;color:#fff;border-radius:999px;padding:4px 12px;font-size:13px;font-weight:600}
+.live::before{content:"";width:8px;height:8px;border-radius:50%;background:#fff;animation:blink 1.2s infinite}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.live::before{animation:none}}
+.stage{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}
+@media (max-width:760px){.stage{grid-template-columns:1fr}}
+.tile{position:relative;aspect-ratio:16/10;background:#13263A;border-radius:14px;overflow:hidden;display:grid;place-items:center;border:2px solid transparent}
+.tile.speaking{border-color:#4CC197}
+.tile video{width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.tile .av{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;font-size:32px;font-weight:600;background:#1C4E80;color:#fff}
+.tile .nm{position:absolute;left:12px;bottom:12px;background:rgba(0,0,0,.55);padding:4px 10px;border-radius:8px;font-size:13px}
+.tile .st{position:absolute;right:12px;top:12px;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:600;background:rgba(0,0,0,.55)}
+.tile .st.ok{background:#2F9C78}
+.tile .camoff{color:#9FB3C8;font-size:13px;text-align:center;padding:0 20px}
+.lobby{margin-top:18px;display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:14px}
+@media (max-width:760px){.lobby{grid-template-columns:1fr}}
+.rcard{background:#13263A;border-radius:14px;padding:18px}
+.rcard h3{margin:0 0 10px;font-size:16px}
+.who{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid #22384F;font-size:14px}
+.who:last-child{border-bottom:0}
+.dot{display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:8px;background:#5D7189}
+.dot.ok{background:#4CC197}
+.controls{display:flex;justify-content:center;gap:12px;margin-top:18px;flex-wrap:wrap}
+.cbtn{width:54px;height:54px;border-radius:50%;border:0;background:#22384F;color:#fff;cursor:pointer;display:grid;place-items:center}
+.cbtn.off{background:#B53B3B}
+.cbtn.end{background:#B53B3B;width:auto;padding:0 22px;border-radius:999px;font-weight:600}
+.demo{border:1px dashed #3C5875;border-radius:12px;padding:12px 14px;font-size:13px;color:#9FB3C8;margin-top:14px}
+.demo .btn{margin-top:8px}
+.room .btn-ghost{color:#E6EEF6;border-color:#3C5875}
+.room .btn-accent{color:#fff}
+.bigready{font-size:17px;padding:15px 34px}
+
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%) translateY(20px);background:#0E2740;color:#fff;padding:12px 18px;border-radius:12px;font-size:14px;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:.25s;z-index:200;max-width:calc(100% - 30px)}
+.toast.on{opacity:1;transform:translateX(-50%)}
+.footer{background:var(--brand-ink);color:#D3E0EE;font-size:13px}
+:root[data-theme="dark"] .footer{background:#0B1724}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .footer{background:#0B1724}}
+.footer .wrap{padding-top:22px;padding-bottom:22px;display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+</style>
+</head>
+<body>
+
+<div class="poc">
+  <div class="wrap">
+    <span><b>Video KYC</b> working POC</span>
+    <nav aria-label="POC views">
+      <a href="#contact" data-v="contact">Contact us form</a>
+      <a href="#job" data-v="job">Job application form</a>
+      <a href="#admin" data-v="admin">Admin panel</a>
+      <a href="#outbox" data-v="outbox">Email outbox <span class="count" id="mailCount">0</span></a>
+    </nav>
+  </div>
+</div>
+
+<div id="site">
+  <div class="topbar"><div class="wrap">
+    <span>Looking for Home Care? <a href="tel:01702840268">01702 840268</a> · <a href="tel:07721085279">07721 085279</a></span>
+    <span>enquiries@proactive-medicare.co.uk</span>
+  </div></div>
+  <header class="header"><div class="wrap">
+    <a class="logo" href="#contact" aria-label="Proactive Medicare home">
+      <svg width="46" height="46" viewBox="0 0 46 46" aria-hidden="true">
+        <circle cx="23" cy="23" r="22" fill="var(--brand)"/>
+        <path d="M11 23 L23 12 L35 23" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M23 33.5c-.4 0-7.5-4.6-7.5-9.2 0-2.3 1.7-4 3.8-4 1.6 0 2.9 1 3.7 2.2.8-1.2 2.1-2.2 3.7-2.2 2.1 0 3.8 1.7 3.8 4 0 4.6-7.1 9.2-7.5 9.2z" fill="#5CC9A0"/>
+      </svg>
+      <span class="wm"><strong>Proactive Medicare</strong><span>Care service as close to family as it gets</span></span>
+    </a>
+    <nav class="mainnav" aria-label="Site">
+      <a href="#contact">Services</a><a href="#contact">Our Carers</a>
+      <a href="#job" id="navJobs">Jobs</a><a href="#contact">About Us</a>
+      <a href="#contact" id="navContact">Contact us</a>
+    </nav>
+  </div></header>
+  <section class="pagehero"><div class="wrap">
+    <div class="crumb" id="crumb">Proactive Medicare › Contact us</div>
+    <h1 id="heroTitle">Contact us</h1>
+    <p id="heroSub">Feel free to contact us and we will take care of the rest</p>
+  </div></section>
+</div>
+
+<div id="app"></div>
+
+<footer class="footer" id="footer"><div class="wrap">
+  <span>Proactive Medicare Ltd. 118 High Street, Rayleigh, Essex, SS6 7BY</span>
+  <span>CQC rated Good · Copyright © Proactive Medicare</span>
+</div></footer>
+
+<div class="backdrop" id="backdrop" role="dialog" aria-modal="true"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function(){
+'use strict';
+/* ---------------- Storage & state ---------------- */
+const KEY='pm-video-kyc-poc-v1';
+const ADMIN_EMAIL='enquiries@proactive-medicare.co.uk';
+const BASE_LINK='https://proactive-medicare.co.uk/video-kyc/room/';
+let S;
+const pad=n=>String(n).padStart(2,'0');
+const iso=d=>d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());
+const parseISO=s=>{const [y,m,d]=s.split('-').map(Number);return new Date(y,m-1,d)};
+const fmtDate=s=>parseISO(s).toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short',year:'numeric'});
+const fmtLong=s=>parseISO(s).toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+const fmtTime=t=>{const [h,m]=t.split(':').map(Number);const d=new Date();d.setHours(h,m);return d.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})};
+const nowStamp=()=>new Date().toISOString();
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const initials=n=>String(n||'?').trim().split(/\s+/).map(w=>w[0]).slice(0,2).join('').toUpperCase();
+
+function nextWorkdays(count){
+  const out=[];const d=new Date();d.setHours(0,0,0,0);
+  while(out.length<count){d.setDate(d.getDate()+1);if(d.getDay()>0&&d.getDay()<6)out.push(iso(d));}
+  return out;
+}
+function seed(){
+  const days=nextWorkdays(3);
+  const past=new Date();past.setDate(past.getDate()-1);
+  const s={
+    availability:{days:[1,2,3,4,5],slots:['09:30','10:30','11:30','14:00','15:00','16:00']},
+    bookings:[],emails:[],seq:1043
+  };
+  s.bookings.push(mkBooking({id:'PMK-1041',type:'service',name:'Margaret Ellis',email:'margaret.ellis@example.com',phone:'07700 900123',date:days[0],time:'10:30',context:'Care for Parent(s)',docs:[{name:'Passport - Margaret Ellis.pdf',size:482133},{name:'Council tax bill.pdf',size:210552}]}));
+  s.bookings.push(mkBooking({id:'PMK-1042',type:'job',name:'Daniel Okafor',email:'daniel.okafor@example.com',phone:'07700 900456',date:days[1],time:'14:00',context:'Senior Carer',docs:[{name:'Daniel Okafor CV.pdf',size:156020},{name:'DBS certificate.jpg',size:932110}]}));
+  const done=mkBooking({id:'PMK-1040',type:'job',name:'Priya Sharma',email:'priya.sharma@example.com',phone:'07700 900789',date:iso(past),time:'11:30',context:'Live-in Carer',docs:[{name:'Right to work - share code.pdf',size:88001}]});
+  done.status='completed';done.durationSec=1094;done.endedAt=past.toISOString();
+  s.bookings.push(done);
+  return s;
+}
+function mkBooking(o){return Object.assign({status:'scheduled',docs:[],createdAt:nowStamp(),room:{adminJoined:false,userReady:false,startedAt:null},mom:null},o)}
+function load(){
+  try{const raw=localStorage.getItem(KEY);S=raw?JSON.parse(raw):null}catch(e){S=null}
+  if(!S||!S.bookings){S=seed();S.bookings.forEach(b=>{if(b.status==='scheduled')sendBookingEmails(b,true)});save();}
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const byId=id=>S.bookings.find(b=>b.id===id);
+const typeLabel=t=>t==='job'?'Job seeker – interview':'Service enquiry';
+const statusLabel={scheduled:'Scheduled',live:'In call',completed:'MOM pending',mom_shared:'MOM shared',cancelled:'Cancelled'};
+const roomLink=b=>BASE_LINK+b.id;
+
+/* ---------------- Emails ---------------- */
+function emailShell(inner){
+  return `<div class="ecard"><div class="eh">
+    <svg width="28" height="28" viewBox="0 0 46 46" aria-hidden="true"><circle cx="23" cy="23" r="22" fill="#fff"/><path d="M11 23 L23 12 L35 23" fill="none" stroke="#1C4E80" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/><path d="M23 33.5c-.4 0-7.5-4.6-7.5-9.2 0-2.3 1.7-4 3.8-4 1.6 0 2.9 1 3.7 2.2.8-1.2 2.1-2.2 3.7-2.2 2.1 0 3.8 1.7 3.8 4 0 4.6-7.1 9.2-7.5 9.2z" fill="#2F9C78"/></svg>
+    <strong>Proactive Medicare</strong></div>
+    <div class="ec">${inner}</div>
+    <div class="ef">Proactive Medicare Ltd. 118 High Street, Rayleigh, Essex, SS6 7BY · 01702 840268</div></div>`;
+}
+function detailsTable(b){
+  return `<table class="et">
+    <tr><td><b>Reference</b></td><td>${b.id}</td></tr>
+    <tr><td><b>Type</b></td><td>${typeLabel(b.type)}${b.context?' – '+esc(b.context):''}</td></tr>
+    <tr><td><b>Date</b></td><td>${fmtLong(b.date)}</td></tr>
+    <tr><td><b>Time</b></td><td>${fmtTime(b.time)} (UK time)</td></tr>
+  </table>`;
+}
+function pushEmail(e){e.id='M'+(Date.now().toString(36))+Math.random().toString(36).slice(2,6);e.at=e.at||nowStamp();S.emails.unshift(e)}
+function sendBookingEmails(b,silent){
+  const what=b.type==='job'?'Video KYC interview':'Video KYC';
+  pushEmail({to:ADMIN_EMAIL,from:'noreply@proactive-medicare.co.uk',kind:'Admin',bookingId:b.id,
+    subject:`New ${what} booking – ${b.name}, ${fmtDate(b.date)} ${fmtTime(b.time)}`,
+    body:emailShell(`<h4>New ${what} booked</h4>
+      <p>A new ${what} has been booked through the website.</p>${detailsTable(b)}
+      <p><b>Name:</b> ${esc(b.name)}<br><b>Email:</b> ${esc(b.email)}<br><b>Phone:</b> ${esc(b.phone||'–')}<br>
+      <b>Documents:</b> ${b.docs.length?b.docs.map(d=>esc(d.name)).join(', '):'None uploaded'}</p>
+      <p>Meeting link (admin):<br><a href="#" data-room="${b.id}|admin">${roomLink(b)}?role=host</a></p>
+      <p><a class="btn btn-primary btn-sm" href="#" data-room="${b.id}|admin">Join call from admin panel</a></p>`)});
+  pushEmail({to:b.email,from:'noreply@proactive-medicare.co.uk',kind:'User',bookingId:b.id,
+    subject:`Your ${what} is confirmed – ${fmtDate(b.date)} at ${fmtTime(b.time)}`,
+    body:emailShell(`<h4>Hello ${esc(b.name.split(' ')[0])}, your ${what} is booked</h4>
+      <p>Thank you for choosing Proactive Medicare. A member of our team will verify your identity over a short, secure video call.</p>${detailsTable(b)}
+      <p><b>Your meeting link</b><br><a href="#" data-room="${b.id}|user">${roomLink(b)}</a></p>
+      <p><a class="btn btn-accent btn-sm" href="#" data-room="${b.id}|user">Open meeting room</a></p>
+      <p><b>Before the call:</b> please keep your photo ID (passport or driving licence) and a proof of address ready. Open the link a few minutes early, allow camera and microphone, and click <b>I am Ready</b>. The call starts as soon as our team joins.</p>`)});
+  if(!silent)save();
+}
+function sendMomEmail(b){
+  const m=b.mom;
+  pushEmail({to:b.email,from:'noreply@proactive-medicare.co.uk',kind:'User',bookingId:b.id,
+    subject:`Minutes of your Video KYC – ${b.id}`,
+    body:emailShell(`<h4>Minutes of meeting</h4>
+      <p>Dear ${esc(b.name)}, thank you for attending your video call with Proactive Medicare. Here is a summary of what we discussed.</p>
+      ${detailsTable(b)}
+      <p><b>Identity verification:</b> ${esc(m.identity)}<br><b>Documents reviewed:</b> ${m.docsChecked.length?m.docsChecked.map(esc).join(', '):'None'}<br><b>Outcome:</b> ${esc(m.outcome)}</p>
+      <p><b>Summary of discussion</b></p><div class="momblock">${esc(m.summary)}</div>
+      ${m.next?`<p><b>Next steps</b></p><div class="momblock">${esc(m.next)}</div>`:''}
+      <p>Recorded by ${esc(m.by)} on ${new Date(m.finalAt).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})}.</p>
+      <p>If anything here is not right, reply to this email or call 01702 840268.</p>`)});
+}
+
+/* ---------------- Toast & modal ---------------- */
+const toastEl=document.getElementById('toast');let tT;
+function toast(msg){toastEl.textContent=msg;toastEl.classList.add('on');clearTimeout(tT);tT=setTimeout(()=>toastEl.classList.remove('on'),3200)}
+const bd=document.getElementById('backdrop'),md=document.getElementById('modal');
+let onModalClose=null;
+function openModal(html,onClose){md.innerHTML=html;bd.classList.add('on');onModalClose=onClose||null;document.body.style.overflow='hidden';setTimeout(()=>{const f=md.querySelector('input,select,textarea,button:not(.x)');f&&f.focus()},50)}
+function closeModal(){bd.classList.remove('on');md.innerHTML='';document.body.style.overflow='';const cb=onModalClose;onModalClose=null;cb&&cb()}
+bd.addEventListener('click',e=>{if(e.target===bd||e.target.closest('[data-close]'))closeModal()});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&bd.classList.contains('on'))closeModal()});
+
+/* ---------------- Video KYC booking modal (shared) ---------------- */
+function slotTaken(date,time){return S.bookings.some(b=>b.date===date&&b.time===time&&b.status!=='cancelled')}
+function slotPast(date,time){const [h,m]=time.split(':').map(Number);const d=parseISO(date);d.setHours(h,m);return d.getTime()<Date.now()+60*60*1000}
+function freeSlots(date){return S.availability.slots.slice().sort().filter(t=>!slotTaken(date,t)&&!slotPast(date,t))}
+function dateAvailable(date){
+  const d=parseISO(date);const today=new Date();today.setHours(0,0,0,0);
+  const max=new Date(today);max.setDate(max.getDate()+45);
+  return d>=today&&d<=max&&S.availability.days.includes(d.getDay())&&freeSlots(date).length>0;
+}
+function openKycModal(type,prefill,onBooked,onCancelled){
+  const isJob=type==='job';
+  const st={date:null,time:null,docs:[],month:new Date()};st.month.setDate(1);
+  let booked=null;
+  openModal(`
+    <div class="mhead"><div><h3>${isJob?'Book your Video KYC interview':'Book your Video KYC'}</h3>
+      <p>${isJob?'Verify your identity and meet our recruitment team on a short video call.':'Verify your identity with our care team on a short, secure video call.'}</p></div>
+      <button class="x" data-close aria-label="Close">×</button></div>
+    <div class="mbody" id="kycBody">
+      <div class="steps">
+        <div>
+          <p class="sh"><span>1</span>Select date</p>
+          <div class="cal" id="cal"></div>
+          <div class="legend"><span><i></i>Available</span><span>Greyed dates have no free slots</span></div>
+        </div>
+        <div>
+          <p class="sh"><span>2</span>Select time slot</p>
+          <div id="slots"><p class="hint">Pick a date to see available times.</p></div>
+          <p class="sh" style="margin-top:20px"><span>3</span>Upload documents <span style="background:none;color:var(--muted);width:auto;font-weight:400">(optional)</span></p>
+          <label class="drop" id="drop" tabindex="0">
+            <input type="file" id="docInput" multiple accept=".pdf,.jpg,.jpeg,.png" class="sr">
+            <strong>Choose files</strong> or drag them here<br><span class="hint">Photo ID, proof of address${isJob?', CV, DBS, right to work':''} · PDF, JPG, PNG</span>
+          </label>
+          <ul class="files" id="fileList"></ul>
+        </div>
+      </div>
+      <div class="fgrid" style="margin-top:18px">
+        <div><label class="f" for="kName">Your name <em>*</em></label><input type="text" id="kName" value="${esc(prefill.name)}" autocomplete="name"><div class="err">Enter your name</div></div>
+        <div><label class="f" for="kEmail">Email for confirmation <em>*</em></label><input type="email" id="kEmail" value="${esc(prefill.email)}" autocomplete="email"><div class="err">Enter a valid email address</div></div>
+      </div>
+      <div class="summary" id="kSum">Choose a date and a time slot to continue.</div>
+    </div>
+    <div class="mfoot" id="kycFoot">
+      <button class="btn btn-ghost" data-close>Cancel</button>
+      <button class="btn btn-accent" id="confirmBtn" disabled>Confirm booking</button>
+    </div>`,()=>{booked?onBooked(booked):onCancelled()});
+
+  const cal=md.querySelector('#cal'),slotsEl=md.querySelector('#slots'),sum=md.querySelector('#kSum'),btn=md.querySelector('#confirmBtn');
+  function drawCal(){
+    const m=st.month;const y=m.getFullYear(),mo=m.getMonth();
+    const first=new Date(y,mo,1);const startDow=(first.getDay()+6)%7;const dim=new Date(y,mo+1,0).getDate();
+    const cur=new Date();cur.setDate(1);cur.setHours(0,0,0,0);
+    let h=`<div class="calh"><button type="button" id="pm" aria-label="Previous month" ${first<=cur?'disabled':''}>‹</button>
+      <span>${first.toLocaleDateString('en-GB',{month:'long',year:'numeric'})}</span>
+      <button type="button" id="nm" aria-label="Next month">›</button></div><div class="calg">`;
+    ['Mo','Tu','We','Th','Fr','Sa','Su'].forEach(d=>h+=`<div class="dow">${d}</div>`);
+    for(let i=0;i<startDow;i++)h+='<div></div>';
+    for(let d=1;d<=dim;d++){
+      const ds=iso(new Date(y,mo,d));const ok=dateAvailable(ds);
+      h+=`<button type="button" data-d="${ds}" class="${ok?'avail':''} ${st.date===ds?'sel':''}" ${ok?'':'disabled'} aria-label="${fmtLong(ds)}${ok?'':' – unavailable'}">${d}</button>`;
+    }
+    cal.innerHTML=h+'</div>';
+    cal.querySelector('#pm').onclick=()=>{st.month.setMonth(st.month.getMonth()-1);drawCal()};
+    cal.querySelector('#nm').onclick=()=>{st.month.setMonth(st.month.getMonth()+1);drawCal()};
+    cal.querySelectorAll('[data-d]').forEach(b=>b.onclick=()=>{st.date=b.dataset.d;st.time=null;drawCal();drawSlots();upd()});
+  }
+  function drawSlots(){
+    if(!st.date){slotsEl.innerHTML='<p class="hint">Pick a date to see available times.</p>';return}
+    const all=S.availability.slots.slice().sort();
+    slotsEl.innerHTML=`<p class="hint" style="margin:0 0 8px">${fmtLong(st.date)}</p><div class="slots">`+
+      all.map(t=>{const dis=slotTaken(st.date,t)||slotPast(st.date,t);
+        return `<button type="button" class="slot ${st.time===t?'sel':''}" data-t="${t}" ${dis?'disabled':''} aria-label="${fmtTime(t)}${dis?' – booked':''}">${fmtTime(t)}</button>`}).join('')+
+      '</div><p class="hint" style="margin-top:8px">Each call lasts about 20 minutes. Crossed-out times are already booked.</p>';
+    slotsEl.querySelectorAll('[data-t]').forEach(b=>b.onclick=()=>{st.time=b.dataset.t;drawSlots();upd()});
+  }
+  function drawFiles(){
+    const ul=md.querySelector('#fileList');
+    ul.innerHTML=st.docs.map((f,i)=>`<li><span>📄 ${esc(f.name)} <span class="hint">(${Math.max(1,Math.round(f.size/1024))} KB)</span></span><button type="button" data-rm="${i}" aria-label="Remove ${esc(f.name)}">Remove</button></li>`).join('');
+    ul.querySelectorAll('[data-rm]').forEach(b=>b.onclick=()=>{st.docs.splice(+b.dataset.rm,1);drawFiles();upd()});
+  }
+  function addFiles(list){[...list].forEach(f=>{if(f.size>10*1024*1024){toast(f.name+' is over 10 MB – choose a smaller file');return}st.docs.push({name:f.name,size:f.size})});drawFiles();upd()}
+  function upd(){
+    btn.disabled=!(st.date&&st.time);
+    sum.innerHTML=st.date&&st.time?`<b>${fmtLong(st.date)}</b> at <b>${fmtTime(st.time)}</b> · ${st.docs.length} document${st.docs.length===1?'':'s'} attached. A meeting link will be emailed to you.`:'Choose a date and a time slot to continue.';
+  }
+  const inp=md.querySelector('#docInput'),drop=md.querySelector('#drop');
+  inp.onchange=()=>{addFiles(inp.files);inp.value=''};
+  drop.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();inp.click()}});
+  ['dragover','dragenter'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.add('over')}));
+  ['dragleave','drop'].forEach(ev=>drop.addEventListener(ev,e=>{e.preventDefault();drop.classList.remove('over')}));
+  drop.addEventListener('drop',e=>addFiles(e.dataTransfer.files));
+
+  // jump to month of first available date
+  for(let i=0;i<45;i++){const d=new Date();d.setDate(d.getDate()+i);if(dateAvailable(iso(d))){st.month=new Date(d.getFullYear(),d.getMonth(),1);break}}
+  drawCal();drawSlots();
+
+  btn.onclick=()=>{
+    const n=md.querySelector('#kName'),em=md.querySelector('#kEmail');
+    let ok=true;
+    n.classList.toggle('invalid',!n.value.trim());if(!n.value.trim())ok=false;
+    const ev=/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em.value.trim());em.classList.toggle('invalid',!ev);if(!ev)ok=false;
+    if(!ok)return;
+    if(slotTaken(st.date,st.time)){toast('That slot was just taken – please pick another');st.time=null;drawSlots();upd();return}
+    const b=mkBooking({id:'PMK-'+(S.seq++),type,name:n.value.trim(),email:em.value.trim(),phone:prefill.phone||'',date:st.date,time:st.time,context:prefill.context||'',docs:st.docs});
+    S.bookings.push(b);sendBookingEmails(b);save();booked=b;updateMailCount();
+    md.querySelector('#kycBody').innerHTML=`<div class="thanks">
+      <div class="tick">✓</div><h2 style="font-family:var(--serif);color:var(--brand-ink)">Your Video KYC is booked</h2>
+      <p class="lead" style="margin-bottom:6px">${fmtLong(b.date)} at ${fmtTime(b.time)} · Reference ${b.id}</p>
+      <p>We've emailed the meeting link to <b>${esc(b.email)}</b>. Our team has been notified too.</p>
+      <div class="linkbox"><span>🔗</span><span>${roomLink(b)}</span></div>
+      <p class="hint">On the day, open the link and click <b>I am Ready</b>. The call starts once our team joins.</p></div>`;
+    md.querySelector('#kycFoot').innerHTML=`<a class="btn btn-ghost" href="#outbox">View emails sent</a><button class="btn btn-primary" data-close>Done</button>`;
+    md.querySelector('#kycFoot a').onclick=()=>{setTimeout(closeModal,0)};
+  };
+}
+
+/* ---------------- Public forms ---------------- */
+function kycOptBlock(type){
+  const isJob=type==='job';
+  return `<div class="kyc-opt full">
+    <label class="chk"><input type="checkbox" id="kycChk">
+      <span>${isJob?'Opt for Video KYC Interview':'I would like to opt for Video KYC'}<span class="newtag">New</span>
+      <small>${isJob?'Verify your identity and have your first interview over a scheduled video call.':'Verify your identity securely over a scheduled video call with our care team.'}</small></span></label>
+    <div class="kyc-sum" id="kycSum"></div>
+  </div>`;
+}
+function wireKyc(form,type,getPrefill){
+  const chk=form.querySelector('#kycChk'),sumEl=form.querySelector('#kycSum');
+  form._kyc=null;
+  const showSum=()=>{
+    const b=form._kyc;
+    if(!b){sumEl.classList.remove('on');sumEl.innerHTML='';return}
+    sumEl.classList.add('on');
+    sumEl.innerHTML=`<span>📅 Booked: <b>${fmtDate(b.date)}, ${fmtTime(b.time)}</b> · Ref ${b.id}</span>
+      <button type="button" class="lnk" id="kChange">Change</button><button type="button" class="lnk" id="kCancel">Cancel booking</button>`;
+    sumEl.querySelector('#kChange').onclick=()=>{cancelBooking(b,true);form._kyc=null;open()};
+    sumEl.querySelector('#kCancel').onclick=()=>{cancelBooking(b);form._kyc=null;chk.checked=false;showSum();toast('Video KYC booking cancelled')};
+  };
+  const open=()=>openKycModal(type,getPrefill(),b=>{form._kyc=b;chk.checked=true;showSum();toast('Booking confirmed – emails sent to you and our team')},()=>{if(!form._kyc){chk.checked=false}showSum()});
+  chk.addEventListener('change',()=>{
+    if(chk.checked)open();
+    else if(form._kyc){cancelBooking(form._kyc);form._kyc=null;showSum();toast('Video KYC booking cancelled')}
+  });
+}
+function cancelBooking(b,quiet){
+  const bb=byId(b.id);if(!bb)return;bb.status='cancelled';
+  if(!quiet){pushEmail({to:bb.email,from:'noreply@proactive-medicare.co.uk',kind:'User',bookingId:bb.id,subject:`Your Video KYC ${bb.id} has been cancelled`,body:emailShell(`<h4>Booking cancelled</h4><p>Your Video KYC on ${fmtLong(bb.date)} at ${fmtTime(bb.time)} has been cancelled. You can book a new time from our website at any point.</p>`)});}
+  save();updateMailCount();
+}
+function validate(form){
+  let ok=true;
+  form.querySelectorAll('[data-req]').forEach(el=>{
+    let v=el.type==='email'?/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(el.value.trim()):!!el.value.trim();
+    el.classList.toggle('invalid',!v);if(!v)ok=false;
+  });
+  const first=form.querySelector('.invalid');first&&first.focus();
+  return ok;
+}
+function thanks(form,name,b,msg){
+  form.parentElement.innerHTML=`<div class="thanks"><div class="tick">✓</div>
+    <h2>Thank you, ${esc(name.split(' ')[0])}</h2><p class="lead">${msg}</p>
+    ${b?`<div class="summary" style="text-align:left;max-width:460px;margin:14px auto">📅 Your Video KYC is booked for <b>${fmtLong(b.date)} at ${fmtTime(b.time)}</b>. The meeting link is in your email (ref ${b.id}).</div>`:''}
+    <div class="actions" style="justify-content:center">${b?`<a class="btn btn-accent" href="#room/${b.id}/user">Open meeting room</a>`:''}<button class="btn btn-ghost" onclick="location.hash='#'+location.hash.slice(1);window.dispatchEvent(new HashChangeEvent('hashchange'))">Submit another</button></div></div>`;
+}
+function sideInfo(){
+  return `<aside class="side panel">
+    <h3>Get in touch</h3>
+    <ul><li>📍 118 High Street, Rayleigh, Essex, SS6 7BY</li><li>📞 01702 840268</li><li>📱 07721 085279</li><li>✉️ enquiries@proactive-medicare.co.uk</li></ul>
+    <div class="cqc"><b style="font-size:14px">CQC rating</b>
+      ${['Safe','Effective','Caring','Responsive','Well-led'].map(k=>`<div class="row"><span>${k}</span><span class="good">Good</span></div>`).join('')}</div>
+    <div class="cqc" style="background:color-mix(in srgb,var(--accent) 10%,var(--surface))"><b style="font-size:14px">How Video KYC works</b>
+      <p class="hint" style="margin:6px 0 0">Tick the Video KYC box, pick a date and time, and we'll email you a meeting link. On the day, click "I am Ready" and our team will join you.</p></div>
+  </aside>`;
+}
+function renderContact(app){
+  app.innerHTML=`<main><div class="wrap grid2">
+    <div class="panel"><h2>Request form</h2>
+      <p class="lead">Please complete the request form below and let us know how we can help. One of our team members will respond to you promptly.</p>
+      <form id="cForm" novalidate><div class="fgrid">
+        <div><label class="f" for="cName">Full name <em>*</em></label><input type="text" id="cName" data-req autocomplete="name"><div class="err">Enter your full name</div></div>
+        <div><label class="f" for="cEmail">Email <em>*</em></label><input type="email" id="cEmail" data-req autocomplete="email"><div class="err">Enter a valid email address</div></div>
+        <div><label class="f" for="cPhone">Phone <em>*</em></label><input type="tel" id="cPhone" data-req autocomplete="tel"><div class="err">Enter a phone number</div></div>
+        <div><label class="f" for="cPost">Postcode</label><input type="text" id="cPost" autocomplete="postal-code"></div>
+        <div class="full"><label class="f">I'm interested in</label><div class="radios">
+          <label><input type="radio" name="interest" value="Care for Self" checked> Care for Self</label>
+          <label><input type="radio" name="interest" value="Care for Parent(s)"> Care for Parent(s)</label>
+          <label><input type="radio" name="interest" value="Care for Other"> Care for Other</label></div></div>
+        <div class="full"><label class="f" for="cHear">How did you hear about us?</label><select id="cHear">
+          <option>Newspaper/Magazine</option><option selected>Web Search</option><option>Sign/Office Location</option><option>Healthcare Professional</option><option>Family/Friend</option><option>Other</option></select></div>
+        <div class="full"><label class="f" for="cMsg">Message</label><textarea id="cMsg" placeholder="Tell us a little about the support you need"></textarea></div>
+        ${kycOptBlock('service')}
+      </div>
+      <div class="actions"><button class="btn btn-primary" type="submit">Send request</button></div></form>
+    </div>${sideInfo()}</div></main>`;
+  const f=app.querySelector('#cForm');
+  wireKyc(f,'service',()=>({name:f.querySelector('#cName').value,email:f.querySelector('#cEmail').value,phone:f.querySelector('#cPhone').value,context:f.querySelector('[name=interest]:checked').value}));
+  f.onsubmit=e=>{e.preventDefault();if(!validate(f))return;
+    thanks(f,f.querySelector('#cName').value,f._kyc,'Your request has been sent. One of our team members will respond to you promptly.')};
+}
+function renderJob(app){
+  app.innerHTML=`<main><div class="wrap grid2">
+    <div class="panel"><h2>Apply to become a Carer</h2>
+      <p class="lead">Join the Proactive family. Tell us about yourself and the role you're interested in.</p>
+      <form id="jForm" novalidate><div class="fgrid">
+        <div><label class="f" for="jName">Full name <em>*</em></label><input type="text" id="jName" data-req autocomplete="name"><div class="err">Enter your full name</div></div>
+        <div><label class="f" for="jEmail">Email <em>*</em></label><input type="email" id="jEmail" data-req autocomplete="email"><div class="err">Enter a valid email address</div></div>
+        <div><label class="f" for="jPhone">Phone <em>*</em></label><input type="tel" id="jPhone" data-req autocomplete="tel"><div class="err">Enter a phone number</div></div>
+        <div><label class="f" for="jRole">Position <em>*</em></label><select id="jRole" data-req>
+          <option value="">Select a position</option><option>Care Assistant</option><option>Senior Carer</option><option>Live-in Carer</option><option>Overnight Carer</option></select><div class="err">Choose a position</div></div>
+        <div><label class="f" for="jExp">Care experience</label><select id="jExp"><option>No experience yet</option><option>Under 1 year</option><option selected>1–3 years</option><option>3+ years</option></select></div>
+        <div><label class="f">Do you drive?</label><div class="radios"><label><input type="radio" name="drive" checked> Yes</label><label><input type="radio" name="drive"> No</label></div></div>
+        <div class="full"><label class="f" for="jCv">Upload CV</label><input type="file" id="jCv" accept=".pdf,.doc,.docx" style="font-size:14px"></div>
+        <div class="full"><label class="f" for="jAbout">Why do you want to work in care?</label><textarea id="jAbout"></textarea></div>
+        ${kycOptBlock('job')}
+      </div>
+      <div class="actions"><button class="btn btn-primary" type="submit">Submit application</button></div></form>
+    </div>${sideInfo()}</div></main>`;
+  const f=app.querySelector('#jForm');
+  wireKyc(f,'job',()=>({name:f.querySelector('#jName').value,email:f.querySelector('#jEmail').value,phone:f.querySelector('#jPhone').value,context:f.querySelector('#jRole').value||'Carer'}));
+  f.onsubmit=e=>{e.preventDefault();if(!validate(f))return;
+    thanks(f,f.querySelector('#jName').value,f._kyc,'Your application has been received. Our recruitment team will be in touch.')};
+}
+
+/* ---------------- Admin panel ---------------- */
+let adminTab='upcoming',adminSection='bookings';
+function renderAdmin(app){
+  const bs=S.bookings;
+  const todayS=iso(new Date());
+  const upcoming=bs.filter(b=>b.status==='scheduled'||b.status==='live').sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  const pending=bs.filter(b=>b.status==='completed');
+  const shared=bs.filter(b=>b.status==='mom_shared');
+  const cancelled=bs.filter(b=>b.status==='cancelled');
+  const lists={upcoming,pending,shared,cancelled};
+  const rows=lists[adminTab];
+  app.innerHTML=`<main><div class="wrap admin-wrap">
+    <nav class="aside" aria-label="Admin">
+      <h4>Proactive Medicare admin</h4>
+      <a href="#" data-sec="bookings" class="${adminSection==='bookings'?'on':''}">📅 Video KYC bookings</a>
+      <a href="#" data-sec="availability" class="${adminSection==='availability'?'on':''}">🕒 Availability</a>
+      <a href="#outbox">✉️ Email log</a>
+      <p class="hint" style="color:#A9BED3;margin-top:16px;font-size:12px">Signed in as Admin (enquiries@)</p>
+    </nav>
+    <section>
+    ${adminSection==='bookings'?`
+      <div class="stats">
+        <div class="stat"><b>${upcoming.length}</b><span>Upcoming calls</span></div>
+        <div class="stat"><b>${upcoming.filter(b=>b.date===todayS).length}</b><span>Today</span></div>
+        <div class="stat"><b>${pending.length}</b><span>MOM pending</span></div>
+        <div class="stat"><b>${shared.length}</b><span>MOM shared</span></div>
+      </div>
+      <div class="tabs" role="tablist">
+        ${[['upcoming','Upcoming'],['pending','MOM pending'],['shared','Completed'],['cancelled','Cancelled']].map(([k,l])=>`<button role="tab" aria-selected="${adminTab===k}" class="${adminTab===k?'on':''}" data-tab="${k}">${l} (${lists[k].length})</button>`).join('')}
+      </div>
+      <div class="tablewrap"><table><thead><tr><th>Ref</th><th>Name</th><th>Type</th><th>Date & time</th><th>Docs</th><th>Status</th><th>Actions</th></tr></thead><tbody>
+      ${rows.length?rows.map(b=>`<tr>
+        <td><b>${b.id}</b></td>
+        <td>${esc(b.name)}<br><span class="hint">${esc(b.email)}</span></td>
+        <td class="t-${b.type}">${typeLabel(b.type)}<br><span class="hint">${esc(b.context)}</span></td>
+        <td>${fmtDate(b.date)}<br><span class="hint">${fmtTime(b.time)}</span></td>
+        <td>${b.docs.length}</td>
+        <td><span class="pill p-${b.status}">${statusLabel[b.status]}</span>${b.status==='scheduled'&&b.room.userReady?'<br><span class="hint" style="color:var(--accent-ink)">● User is ready</span>':''}</td>
+        <td><div class="rowact">
+          ${b.status==='scheduled'||b.status==='live'?`<a class="btn btn-accent btn-sm" href="#room/${b.id}/admin">Join call</a>`:''}
+          ${b.status==='completed'?`<button class="btn btn-primary btn-sm" data-mom="${b.id}">${b.mom?'Edit MOM':'Add MOM'}</button>`:''}
+          ${b.status==='mom_shared'?`<button class="btn btn-ghost btn-sm" data-mom="${b.id}">View MOM</button>`:''}
+          <button class="btn btn-ghost btn-sm" data-view="${b.id}">Details</button>
+          ${b.status==='scheduled'?`<button class="btn btn-ghost btn-sm" data-cancel="${b.id}">Cancel</button>`:''}
+        </div></td></tr>`).join(''):`<tr><td colspan="7" class="empty">${adminTab==='upcoming'?'No upcoming calls. New bookings from the Contact us and Job application forms appear here.':'Nothing here yet.'}</td></tr>`}
+      </tbody></table></div>`:renderAvailability()}
+    </section></div></main>`;
+  app.querySelectorAll('[data-sec]').forEach(a=>a.onclick=e=>{e.preventDefault();adminSection=a.dataset.sec;renderAdmin(app)});
+  app.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{adminTab=b.dataset.tab;renderAdmin(app)});
+  app.querySelectorAll('[data-mom]').forEach(b=>b.onclick=()=>openMom(byId(b.dataset.mom)));
+  app.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>openDetails(byId(b.dataset.view)));
+  app.querySelectorAll('[data-cancel]').forEach(b=>b.onclick=()=>{if(confirm('Cancel this booking and email the user?')){cancelBooking(byId(b.dataset.cancel));renderAdmin(app);toast('Booking cancelled – user notified')}});
+  if(adminSection==='availability')wireAvailability(app);
+}
+function renderAvailability(){
+  const days=[[1,'Mon'],[2,'Tue'],[3,'Wed'],[4,'Thu'],[5,'Fri'],[6,'Sat'],[0,'Sun']];
+  return `<div class="panel"><h2>Availability</h2><p class="lead">Users can only book the days and time slots you switch on here.</p>
+    <p class="sh">Working days</p><div class="chips" id="dayChips">${days.map(([n,l])=>`<button type="button" class="chip ${S.availability.days.includes(n)?'on':''}" data-day="${n}" aria-pressed="${S.availability.days.includes(n)}">${l}</button>`).join('')}</div>
+    <p class="sh" style="margin-top:20px">Time slots</p><div class="chips" id="slotChips">${S.availability.slots.slice().sort().map(t=>`<button type="button" class="chip on" data-slot="${t}" title="Remove slot">${fmtTime(t)} ✕</button>`).join('')}</div>
+    <div class="addslot"><input type="time" id="newSlot" value="12:30" aria-label="New slot time"><button class="btn btn-primary btn-sm" id="addSlot">Add slot</button></div>
+    <p class="hint" style="margin-top:16px">Changes apply straight away to the booking popup on both forms.</p></div>`;
+}
+function wireAvailability(app){
+  app.querySelectorAll('[data-day]').forEach(b=>b.onclick=()=>{const n=+b.dataset.day;const a=S.availability.days;const i=a.indexOf(n);i>-1?a.splice(i,1):a.push(n);save();renderAdmin(app)});
+  app.querySelectorAll('[data-slot]').forEach(b=>b.onclick=()=>{S.availability.slots=S.availability.slots.filter(t=>t!==b.dataset.slot);save();renderAdmin(app)});
+  app.querySelector('#addSlot').onclick=()=>{const v=app.querySelector('#newSlot').value;if(v&&!S.availability.slots.includes(v)){S.availability.slots.push(v);save();renderAdmin(app);toast('Slot '+fmtTime(v)+' added')}};
+}
+function openDetails(b){
+  openModal(`<div class="mhead"><div><h3>${b.id} · ${esc(b.name)}</h3><p>${typeLabel(b.type)}</p></div><button class="x" data-close aria-label="Close">×</button></div>
+  <div class="mbody"><dl class="kv">
+    <dt>Email</dt><dd>${esc(b.email)}</dd><dt>Phone</dt><dd>${esc(b.phone||'–')}</dd>
+    <dt>${b.type==='job'?'Position':'Interested in'}</dt><dd>${esc(b.context||'–')}</dd>
+    <dt>Date & time</dt><dd>${fmtLong(b.date)}, ${fmtTime(b.time)}</dd>
+    <dt>Status</dt><dd><span class="pill p-${b.status}">${statusLabel[b.status]}</span></dd>
+    <dt>Meeting link</dt><dd style="word-break:break-all">${roomLink(b)}</dd>
+    ${b.durationSec?`<dt>Call duration</dt><dd>${Math.floor(b.durationSec/60)} min ${b.durationSec%60} s</dd>`:''}
+    <dt>Documents</dt><dd>${b.docs.length?`<ul class="files" style="margin:0">${b.docs.map(d=>`<li>📄 ${esc(d.name)} <span class="hint">${Math.max(1,Math.round(d.size/1024))} KB</span></li>`).join('')}</ul>`:'None uploaded'}</dd>
+  </dl></div>
+  <div class="mfoot"><button class="btn btn-ghost" data-close>Close</button></div>`);
+}
+function openMom(b){
+  const m=b.mom||{identity:'Verified',docsChecked:b.docs.map(d=>d.name),outcome:'',summary:'',next:'',final:false};
+  const ro=b.status==='mom_shared';
+  const outcomes=b.type==='job'?['Shortlisted – proceed to compliance checks','On hold','Not progressing']:['Proceed to free home care assessment','Care package agreed','Further information needed','Not proceeding'];
+  openModal(`<div class="mhead"><div><h3>Minutes of meeting · ${b.id}</h3><p>${esc(b.name)} · ${typeLabel(b.type)} · ${fmtDate(b.date)} ${fmtTime(b.time)}${b.durationSec?` · ${Math.round(b.durationSec/60)} min call`:''}</p></div><button class="x" data-close aria-label="Close">×</button></div>
+  <div class="mbody"><fieldset ${ro?'disabled':''} style="border:0;padding:0;margin:0"><div class="fgrid">
+    <div><label class="f" for="mId">Identity verification</label><select id="mId">${['Verified','Partially verified – follow-up needed','Not verified'].map(o=>`<option ${m.identity===o?'selected':''}>${o}</option>`).join('')}</select></div>
+    <div><label class="f" for="mOut">Outcome <em>*</em></label><select id="mOut"><option value="">Select outcome</option>${outcomes.map(o=>`<option ${m.outcome===o?'selected':''}>${o}</option>`).join('')}</select><div class="err">Choose an outcome</div></div>
+    <div class="full"><label class="f">Documents reviewed on call</label>${b.docs.length?b.docs.map((d,i)=>`<label style="display:flex;gap:8px;align-items:center;font-size:14px;margin:4px 0"><input type="checkbox" data-doc="${esc(d.name)}" ${m.docsChecked.includes(d.name)?'checked':''} style="accent-color:var(--accent)"> ${esc(d.name)}</label>`).join(''):'<p class="hint" style="margin:0">No documents were uploaded with this booking.</p>'}</div>
+    <div class="full"><label class="f" for="mSum">Summary of discussion <em>*</em></label><textarea id="mSum" placeholder="What was discussed and agreed on the call">${esc(m.summary)}</textarea><div class="err">Add a short summary</div></div>
+    <div class="full"><label class="f" for="mNext">Next steps</label><textarea id="mNext" style="min-height:80px" placeholder="e.g. Home assessment visit on…">${esc(m.next)}</textarea></div>
+  </div></fieldset>
+  ${ro?`<div class="summary">✓ Finalised and emailed to ${esc(b.email)} on ${new Date(m.finalAt).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})}.</div>`:`<p class="hint" style="margin:14px 0 0">Save draft keeps the notes private. Finalise locks them and emails the MOM to ${esc(b.email)}.</p>`}
+  </div>
+  <div class="mfoot">${ro?'<button class="btn btn-ghost" data-close>Close</button>':`<button class="btn btn-ghost" id="mDraft">Save draft</button><button class="btn btn-accent" id="mFinal">Finalise & email user</button>`}</div>`);
+  if(ro)return;
+  const collect=()=>({identity:md.querySelector('#mId').value,outcome:md.querySelector('#mOut').value,summary:md.querySelector('#mSum').value.trim(),next:md.querySelector('#mNext').value.trim(),docsChecked:[...md.querySelectorAll('[data-doc]:checked')].map(c=>c.dataset.doc),by:'Admin – Proactive Medicare'});
+  md.querySelector('#mDraft').onclick=()=>{b.mom=Object.assign(collect(),{final:false});save();closeModal();rerender();toast('MOM draft saved')};
+  md.querySelector('#mFinal').onclick=()=>{
+    const c=collect();const o=md.querySelector('#mOut'),s=md.querySelector('#mSum');
+    o.classList.toggle('invalid',!c.outcome);s.classList.toggle('invalid',!c.summary);
+    if(!c.outcome||!c.summary)return;
+    b.mom=Object.assign(c,{final:true,finalAt:nowStamp()});b.status='mom_shared';sendMomEmail(b);save();updateMailCount();
+    closeModal();adminTab='shared';rerender();toast('MOM finalised and emailed to '+b.email);
+  };
+}
+
+/* ---------------- Email outbox ---------------- */
+let selMail=null,mailFilter='all';
+function renderOutbox(app){
+  const list=S.emails.filter(e=>mailFilter==='all'||e.kind===mailFilter);
+  if(!selMail||!list.find(e=>e.id===selMail))selMail=list[0]&&list[0].id;
+  const cur=list.find(e=>e.id===selMail);
+  app.innerHTML=`<main><div class="wrap">
+    <div class="panel" style="margin-bottom:18px;padding:16px 20px"><h2 style="font-size:20px">Email outbox</h2>
+      <p class="lead" style="margin:0">Every automated email the system sends is captured here so you can see exactly what the admin and the user receive. In production these go out through your mail provider.</p></div>
+    <div class="tabs">${[['all','All'],['Admin','To admin'],['User','To users']].map(([k,l])=>`<button class="${mailFilter===k?'on':''}" data-f="${k}">${l}</button>`).join('')}</div>
+    <div class="outbox">
+      <div class="mlist">${list.length?list.map(e=>`<button class="mitem ${e.id===selMail?'on':''}" data-m="${e.id}">
+        <div class="to"><span class="tag">${e.kind==='Admin'?'To admin':'To user'}</span> ${esc(e.to)}</div>
+        <div class="sub">${esc(e.subject)}</div>
+        <div class="to">${new Date(e.at).toLocaleString('en-GB',{dateStyle:'medium',timeStyle:'short'})}</div></button>`).join(''):'<div class="empty">No emails yet. Book a Video KYC from either form.</div>'}</div>
+      <div>${cur?`<div class="email"><div class="meta"><h3>${esc(cur.subject)}</h3>
+        <div>From: ${esc(cur.from)}</div><div>To: ${esc(cur.to)}</div><div>${new Date(cur.at).toLocaleString('en-GB',{dateStyle:'full',timeStyle:'short'})}</div></div>
+        <div class="ebody">${cur.body}</div></div>`:''}</div>
+    </div></div></main>`;
+  app.querySelectorAll('[data-m]').forEach(b=>b.onclick=()=>{selMail=b.dataset.m;renderOutbox(app)});
+  app.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>{mailFilter=b.dataset.f;renderOutbox(app)});
+}
+function updateMailCount(){document.getElementById('mailCount').textContent=S.emails.length}
+
+/* ---------------- Meeting room ---------------- */
+let stream=null,timerInt=null,micOn=true,camOn=true,roomCtx=null;
+async function startCam(){
+  if(stream)return attachCam();
+  try{
+    if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('unsupported');
+    stream=await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+  }catch(e){stream=null}
+  attachCam();
+}
+function attachCam(){
+  const v=document.getElementById('localVid'),ph=document.getElementById('localPh');
+  if(!v)return;
+  if(stream&&camOn){v.srcObject=stream;v.style.display='block';ph.style.display='none'}
+  else{v.style.display='none';ph.style.display='grid';ph.querySelector('.camoff').textContent=stream?'Camera is off':'Camera not available here. Allow camera access, or open this page on HTTPS. The flow still works without it.'}
+}
+function stopCam(){if(stream){stream.getTracks().forEach(t=>t.stop());stream=null}}
+function leaveRoom(){
+  if(roomCtx){const b=byId(roomCtx.id);if(b&&b.status==='scheduled'){if(roomCtx.role==='admin')b.room.adminJoined=false;else b.room.userReady=false;save()}}
+  clearInterval(timerInt);timerInt=null;stopCam();roomCtx=null;
+}
+function renderRoom(app,id,role){
+  const b=byId(id);
+  if(!b){app.innerHTML=`<main><div class="wrap panel"><h2>Meeting not found</h2><p class="lead">Check the link in your email, or contact us on 01702 840268.</p></div></main>`;return}
+  const first=!roomCtx||roomCtx.id!==id||roomCtx.role!==role;
+  roomCtx={id,role};
+  if(first&&role==='admin'&&b.status==='scheduled'){b.room.adminJoined=true;save()}
+  const me=role==='admin'?'Proactive Medicare (KYC officer)':b.name;
+  const other=role==='admin'?b.name:'Proactive Medicare';
+  const otherIn=role==='admin'?b.room.userReady:b.room.adminJoined;
+  const meIn=role==='admin'?b.room.adminJoined:b.room.userReady;
+  const isLive=b.status==='live';
+  const ended=b.status==='completed'||b.status==='mom_shared';
+  const cancelled=b.status==='cancelled';
+  let body='';
+  if(cancelled){body=`<div class="rcard" style="text-align:center;padding:40px"><h3>This Video KYC was cancelled</h3><p style="color:#9FB3C8">Book a new time from our website or call 01702 840268.</p></div>`}
+  else if(ended){
+    body=`<div class="rcard" style="text-align:center;padding:40px">
+      <div class="tick" style="width:60px;height:60px;border-radius:50%;background:#2F9C78;display:grid;place-items:center;margin:0 auto 12px;font-size:28px">✓</div>
+      <h3 style="font-size:20px">Call ended${b.durationSec?` · ${Math.floor(b.durationSec/60)} min ${b.durationSec%60} s`:''}</h3>
+      ${role==='admin'?`<p style="color:#9FB3C8">Add the minutes of meeting so the user receives them by email.</p>
+        <div class="actions" style="justify-content:center"><button class="btn btn-accent" id="goMom">${b.status==='mom_shared'?'View MOM':'Add MOM now'}</button><a class="btn btn-ghost" href="#admin">Back to admin panel</a></div>`
+      :`<p style="color:#9FB3C8">Thank you, ${esc(b.name.split(' ')[0])}. We'll email you the minutes of this meeting shortly.</p><div class="actions" style="justify-content:center"><a class="btn btn-ghost" href="#contact">Back to website</a></div>`}
+    </div>`;
+  } else {
+    body=`<div class="stage">
+      <div class="tile ${isLive?'speaking':''}" id="localTile">
+        <video id="localVid" autoplay playsinline muted style="display:none"></video>
+        <div id="localPh" style="display:grid;place-items:center;gap:10px"><div class="av">${initials(me)}</div><div class="camoff"></div></div>
+        <span class="nm">You · ${esc(me)}${micOn?'':' 🔇'}</span>
+        <span class="st ${meIn?'ok':''}">${role==='admin'?(meIn?'In room':'Not joined'):(meIn?'Ready':'Not ready')}</span>
+      </div>
+      <div class="tile">
+        <div style="display:grid;place-items:center;gap:10px;text-align:center">
+          <div class="av" style="background:${role==='admin'?'#2F9C78':'#1C4E80'}">${initials(other)}</div>
+          <div class="camoff">${isLive?'Connected – remote video stream appears here':otherIn?(role==='admin'?'User is ready':'Our team is in the room'):(role==='admin'?'Waiting for the user to click "I am Ready"':'Waiting for our team to join')}</div>
+        </div>
+        <span class="nm">${esc(other)}</span>
+        <span class="st ${otherIn?'ok':''}">${role==='admin'?(otherIn?'Ready':'Not ready'):(otherIn?'Joined':'Not joined yet')}</span>
+      </div>
+    </div>
+    ${isLive?`<div class="controls">
+      <button class="cbtn ${micOn?'':'off'}" id="micBtn" aria-label="${micOn?'Mute microphone':'Unmute microphone'}" title="Microphone">${micOn?'🎙️':'🔇'}</button>
+      <button class="cbtn ${camOn?'':'off'}" id="camBtn" aria-label="${camOn?'Turn camera off':'Turn camera on'}" title="Camera">${camOn?'📷':'🚫'}</button>
+      <button class="cbtn end" id="endBtn">End call</button></div>`
+    :`<div class="lobby">
+      <div class="rcard">
+        <h3>${role==='admin'?'Waiting room':'Get ready for your call'}</h3>
+        ${role==='user'?`<p style="color:#9FB3C8;margin:0 0 14px;font-size:14px">Check your camera and microphone, keep your photo ID nearby, then click <b>I am Ready</b>. The call starts automatically once our team joins.</p>
+          <button class="btn ${meIn?'btn-ghost':'btn-accent'} bigready" id="readyBtn">${meIn?'✓ Ready – waiting for our team (click to undo)':'I am Ready'}</button>`
+        :`<p style="color:#9FB3C8;margin:0 0 14px;font-size:14px">You're in the room. The call starts automatically when ${esc(b.name.split(' ')[0])} clicks "I am Ready".</p>
+          <a class="btn btn-ghost" href="#admin">Leave and go back to admin panel</a>`}
+        <div class="demo"><b style="color:#DCE8F4">Testing alone?</b> Open the ${role==='admin'?'user':'admin'} side in another browser tab to see it sync live, or simulate it here.<br>
+          <button class="btn btn-ghost btn-sm" id="simBtn">${role==='admin'?(otherIn?'Simulate: user not ready':'Simulate: user clicks "I am Ready"'):(otherIn?'Simulate: admin leaves':'Simulate: admin joins')}</button>
+          <a class="btn btn-ghost btn-sm" href="#room/${b.id}/${role==='admin'?'user':'admin'}" target="_blank" rel="noopener">Open ${role==='admin'?'user':'admin'} side in new tab</a></div>
+      </div>
+      <div class="rcard"><h3>Participants</h3>
+        <div class="who"><span><span class="dot ${b.room.adminJoined?'ok':''}"></span>Proactive Medicare (admin)</span><span>${b.room.adminJoined?'Joined':'Not joined'}</span></div>
+        <div class="who"><span><span class="dot ${b.room.userReady?'ok':''}"></span>${esc(b.name)}</span><span>${b.room.userReady?'Ready':'Not ready'}</span></div>
+        <div class="who"><span>Scheduled</span><span>${fmtDate(b.date)}, ${fmtTime(b.time)}</span></div>
+        <div class="who"><span>Documents</span><span>${b.docs.length}</span></div>
+      </div></div>`}`;
+  }
+  app.innerHTML=`<div class="room"><div class="wrap">
+    <div class="rhead"><div><h2>Video KYC · ${b.id}</h2><div class="sub">${typeLabel(b.type)} · ${esc(b.name)} · ${role==='admin'?'Admin view':'User view'}</div></div>
+      <div>${isLive?`<span class="live">Live · <span id="clock">00:00</span></span>`:''}</div></div>
+    ${body}
+  </div></div>`;
+
+  if(!ended&&!cancelled){startCam()}else{stopCam()}
+  const q=s=>app.querySelector(s);
+  q('#readyBtn')&&(q('#readyBtn').onclick=()=>{b.room.userReady=!b.room.userReady;tryStart(b);save();rerender()});
+  q('#simBtn')&&(q('#simBtn').onclick=()=>{if(role==='admin')b.room.userReady=!b.room.userReady;else b.room.adminJoined=!b.room.adminJoined;tryStart(b);save();rerender()});
+  q('#micBtn')&&(q('#micBtn').onclick=()=>{micOn=!micOn;stream&&stream.getAudioTracks().forEach(t=>t.enabled=micOn);rerender()});
+  q('#camBtn')&&(q('#camBtn').onclick=()=>{camOn=!camOn;stream&&stream.getVideoTracks().forEach(t=>t.enabled=camOn);rerender()});
+  q('#endBtn')&&(q('#endBtn').onclick=()=>{
+    b.status='completed';b.endedAt=nowStamp();b.durationSec=Math.max(1,Math.round((Date.now()-new Date(b.room.startedAt).getTime())/1000));
+    b.room.adminJoined=false;b.room.userReady=false;save();stopCam();rerender();
+    if(role==='admin')setTimeout(()=>openMom(b),300);
+  });
+  q('#goMom')&&(q('#goMom').onclick=()=>openMom(b));
+  clearInterval(timerInt);
+  if(isLive){const tick=()=>{const c=document.getElementById('clock');if(!c)return;const s=Math.floor((Date.now()-new Date(b.room.startedAt).getTime())/1000);c.textContent=pad(Math.floor(s/60))+':'+pad(s%60)};tick();timerInt=setInterval(tick,1000)}
+}
+function tryStart(b){
+  if(b.status==='scheduled'&&b.room.adminJoined&&b.room.userReady){b.status='live';b.room.startedAt=nowStamp();toast('Both sides are ready – call started')}
+}
+
+/* ---------------- Router ---------------- */
+const app=document.getElementById('app');
+function rerender(){route(true)}
+function route(keep){
+  const h=(location.hash||'#contact').slice(1);
+  const parts=h.split('/');
+  const v=parts[0]||'contact';
+  const site=document.getElementById('site'),foot=document.getElementById('footer');
+  if(v!=='room'&&roomCtx)leaveRoom();
+  document.querySelectorAll('.poc nav a').forEach(a=>{if(a.dataset.v===v)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current')});
+  const showSite=v==='contact'||v==='job';
+  site.style.display=showSite?'':'none';foot.style.display=v==='room'?'none':'';
+  document.getElementById('navContact').classList.toggle('on',v==='contact');
+  document.getElementById('navJobs').classList.toggle('on',v==='job');
+  if(v==='job'){crumb.textContent='Proactive Medicare › Jobs › Application form';heroTitle.textContent='Apply to become a Carer';heroSub.textContent='Join a team that treats every client like family'}
+  else{crumb.textContent='Proactive Medicare › Contact us';heroTitle.textContent='Contact us';heroSub.textContent='Feel free to contact us and we will take care of the rest'}
+  if(v==='contact'){if(!keep)renderContact(app)}
+  else if(v==='job'){if(!keep)renderJob(app)}
+  else if(v==='admin')renderAdmin(app);
+  else if(v==='outbox')renderOutbox(app);
+  else if(v==='room')renderRoom(app,parts[1],parts[2]==='admin'?'admin':'user');
+  else renderContact(app);
+  updateMailCount();
+  if(!keep)window.scrollTo(0,0);
+}
+const crumb=document.getElementById('crumb'),heroTitle=document.getElementById('heroTitle'),heroSub=document.getElementById('heroSub');
+window.addEventListener('hashchange',()=>route(false));
+document.addEventListener('click',e=>{
+  const r=e.target.closest('[data-room]');
+  if(r){e.preventDefault();const [id,role]=r.dataset.room.split('|');location.hash='#room/'+id+'/'+role}
+});
+// Live sync between tabs (admin in one tab, user in another)
+window.addEventListener('storage',e=>{
+  if(e.key!==KEY)return;
+  load();
+  if(roomCtx){const b=byId(roomCtx.id);if(b)tryStart(b),save()}
+  const v=(location.hash||'#contact').slice(1).split('/')[0];
+  if(v==='room'||v==='admin'||v==='outbox')rerender();
+  updateMailCount();
+});
+window.addEventListener('beforeunload',()=>{if(roomCtx)leaveRoom()});
+
+load();route(false);
+})();
+</script>
+</body>
+</html>
